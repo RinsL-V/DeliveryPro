@@ -1,81 +1,77 @@
 <template>
-  <header class="flex justify-between items-center border-b border-gray-500/50 px-10 py-2 bg-black/20 backdrop-blur-lg shadow-2xl">
-    <div class="flex items-center gap-4">
-      <h2 
-        v-if="!showBackButton"
-        class="text-xl cursor-pointer text-gray-100 font-mono hover:text-white transition-colors duration-300" 
-        @click="goHome"
-      >
-        ENTER
-      </h2>
-      <button 
-        v-else
-        @click="$emit('back')"
-        class="text-gray-300 hover:text-white transition-colors duration-300"
-      >
-        ← Назад
-      </button>
-    </div>
+  <header class="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-lg border-b border-gray-500/50">
+    <nav class="container mx-auto px-4 py-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <h1 class="text-xl font-bold text-white cursor-pointer" @click="$emit('back')">
+            DeliveryPro
+          </h1>
+        </div>
 
-    <ul class="flex items-center gap-10">      
-      <li 
-        class="flex items-center gap-3 cursor-pointer group" 
-        @click="handleCatalogClick"
-      >
-        <a class="text-gray-300 hover:text-white transition-colors duration-300 group-hover:bg-white/5 px-3 py-2 rounded-lg">
-          каталог
-        </a>
-      </li>
+        <div class="flex items-center space-x-4">
+          <template v-if="!user">
+            <button 
+              @click="$emit('open-auth')"
+              class="text-gray-300 hover:text-white transition-colors"
+            >
+              Войти
+            </button>
+          </template>
 
-      <li 
-        class="flex items-center gap-3 cursor-pointer group" 
-        @click="$emit('open-cart')"
-      >
-        <p class="text-gray-300 hover:text-white transition-colors duration-300 group-hover:bg-white/5 px-3 py-2 rounded-lg">
-          корзина
-        </p>
-      </li>
+          <template v-else>
+            <button 
+              @click="$emit('open-create-order')"
+              class="text-gray-300 hover:text-white transition-colors"
+            >
+              Создать заказ
+            </button>
+            <button 
+              @click="$emit('open-orders')"
+              class="text-gray-300 hover:text-white transition-colors"
+            >
+              Мои заказы
+            </button>
+            <button 
+              @click="$emit('open-profile')"
+              class="text-gray-300 hover:text-white transition-colors"
+            >
+              Профиль
+            </button>
+            
+            <button 
+              v-if="user.role === 'admin'"
+              @click="$emit('open-admin')"
+              class="text-orange-400 hover:text-orange-300 transition-colors"
+            >
+              Админ
+            </button>
 
-      <li 
-        class="flex items-center gap-3 cursor-pointer group" 
-        @click="$emit('open-profile')"
-      >
-        <p class="text-gray-300 hover:text-white transition-colors duration-300 group-hover:bg-white/5 px-3 py-2 rounded-lg">
-          профиль
-        </p>
-      </li>
-    </ul>
+            <button 
+              @click="$emit('logout')"
+              class="text-gray-300 hover:text-white transition-colors"
+            >
+              Выйти
+            </button>
+          </template>
+        </div>
+      </div>
+    </nav>
   </header>
 </template>
 
 <script setup>
 defineProps({
-  showBackButton: {
-    type: Boolean,
-    default: false
-  },
-  currentPage: {
-    type: String,
-    default: 'main'
-  }
+  currentPage: String,
+  user: Object
 })
 
-const emit = defineEmits(['open-cart', 'open-profile', 'open-catalog', 'back'])
-
-const goHome = () => {
-  emit('back')
-}
-
-const handleCatalogClick = () => {
-  console.log('Catalog clicked in header')
-  emit('open-catalog')
-}
+defineEmits([
+  'back',
+  'open-auth', 
+  'open-profile',
+  'open-orders',
+  'open-create-order',
+  'open-admin',
+  'logout'
+])
 </script>
-
-<style scoped>
-header {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-}
-</style>

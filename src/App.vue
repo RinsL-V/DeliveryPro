@@ -2,277 +2,343 @@
   <div>
     <div class="global-noise"></div>
 
-    <div class="enter-background" v-if="currentPage !== 'main'">
-      <div class="enter-text">ENTER</div>
-    </div>
-
-    <Drawer 
-      v-if="activeDrawerType" 
-      :type="activeDrawerType" 
-      @close="closeDrawer" 
-      @open-payment-methods="handleOpenPaymentMethods"
-    />
-
-    <!-- Header для всех страниц -->
-    <Header 
+    <Header
       :current-page="currentPage"
-      @open-cart="openDrawer('cart')" 
-      @open-profile="handleProfileClick"
-      @open-catalog="showCatalogPage"
+      :user="user"
+      @open-auth="showAuthPage"
+      @open-profile="showProfilePage"
+      @open-orders="showOrdersPage"
+      @open-create-order="showCreateOrderPage"
+      @open-admin="showAdminPage"
+      @logout="handleLogout"
       @back="showMainPage"
     />
 
-    <!-- Динамический контент страниц -->
-    <div class="min-h-screen flex flex-col">
-      <!-- Главная страница -->
+    <div class="min-h-screen flex flex-col pt-16">
       <div v-if="currentPage === 'main'" class="flex-1">
         <main>
-          <!-- Герой секция -->
-          <section class="border-b border-gray-500/50 py-20 px-8 relative overflow-hidden">
-            <div class="max-w-4xl mx-auto text-center relative z-10">
-              <h1 class="text-5xl font-mono text-gray-100 mb-6 tracking-tight">
-                ENTER
-              </h1>
-              <p class="text-xl text-gray-300 mb-8 leading-relaxed">
-                закрытый клуб знаний и стратегий,<br>
-                каждая глава — шаг в неизведанное
+          <!-- Hero Section -->
+          <section class="py-20 px-8 bg-gradient-to-br from-DAE9E8 to-85AFB5 text-center relative overflow-hidden">
+            <div class="noise-overlay-section"></div>
+            <div class="max-w-6xl mx-auto">
+              <h1 class="text-6xl font-bold text-black mb-6">DeliveryPro</h1>
+              <p class="text-393B3C text-xl mb-8 font-medium">Быстрая и надежная доставка по всему городу</p>
+              <p class="text-393B3C text-lg mb-12 max-w-2xl mx-auto">
+                Доставляем ваши посылки быстро, безопасно и в срок. Работаем 24/7 для вашего удобства.
               </p>
-              <p class="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                Уникальная книга, где весь интернет-<br>
-                магазин превращён в повествование.
-              </p>
+              <div class="flex justify-center gap-4 flex-wrap">
+                <button
+                  v-if="!user"
+                  @click="showAuthPage"
+                  class="bg-1AF9D5 text-black font-semibold py-4 px-8 rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-1AF9D5/25 text-lg"
+                >
+                  Войти / Зарегистрироваться
+                </button>
+                <button
+                  v-if="user"
+                  @click="showCreateOrderPage"
+                  class="bg-1AF9D5 text-black font-semibold py-4 px-8 rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-1AF9D5/25 text-lg"
+                >
+                  Создать заказ
+                </button>
+                <button
+                  v-if="user"
+                  @click="showOrdersPage"
+                  class="border border-1AF9D5 text-black py-4 px-8 rounded-lg hover:bg-1AF9D5 hover:text-black transition-all duration-300 text-lg"
+                >
+                  Мои заказы
+                </button>
+              </div>
             </div>
           </section>
 
-          <!-- Преимущества -->
-          <section class="py-20 px-8 border-b border-gray-500/50">
+          <!-- Features Section -->
+          <section class="py-16 px-8 bg-DAE6E6">
             <div class="max-w-6xl mx-auto">
-              <h2 class="text-3xl font-mono text-gray-100 text-center mb-16">
-                Почему стоит купить главы ENTER
-              </h2>
-              
+              <h2 class="text-4xl font-bold text-black text-center mb-12">Почему выбирают нас?</h2>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="border border-gray-500/50 rounded-lg p-8 bg-black/20 backdrop-blur-lg shadow-2xl text-center transition-all duration-300 hover:scale-105 relative overflow-hidden">
-                  <div class="noise-overlay-card-strong"></div>
-                  <div class="text-4xl font-mono text-gray-100 mb-4 relative z-10">01</div>
-                  <h3 class="text-xl font-semibold text-gray-100 mb-4 relative z-10">Конкретные инструменты мышления.</h3>
+                <div class="bg-white rounded-2xl p-8 text-center hover:shadow-xl transition-all duration-300">
+                  <div class="w-16 h-16 bg-1AF9D5 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl">🚚</span>
+                  </div>
+                  <h3 class="text-xl font-bold text-black mb-4">Быстрая доставка</h3>
+                  <p class="text-393B3C">Доставляем заказы в течение 2-4 часов по городу. Курьеры на автомобилях и скутерах.</p>
                 </div>
-
-                <div class="border border-gray-500/50 rounded-lg p-8 bg-black/20 backdrop-blur-lg shadow-2xl text-center transition-all duration-300 hover:scale-105 relative overflow-hidden">
-                  <div class="noise-overlay-card-strong"></div>
-                  <div class="text-4xl font-mono text-gray-100 mb-4 relative z-10">02</div>
-                  <h3 class="text-xl font-semibold text-gray-100 mb-4 relative z-10">Переход на другой уровень восприятия.</h3>
+                <div class="bg-white rounded-2xl p-8 text-center hover:shadow-xl transition-all duration-300">
+                  <div class="w-16 h-16 bg-1AF9D5 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl">🛡️</span>
+                  </div>
+                  <h3 class="text-xl font-bold text-black mb-4">Гарантия сохранности</h3>
+                  <p class="text-393B3C">Все заказы застрахованы. Компенсация в случае повреждения или утери.</p>
                 </div>
-
-                <div class="border border-gray-500/50 rounded-lg p-8 bg-black/20 backdrop-blur-lg shadow-2xl text-center transition-all duration-300 hover:scale-105 relative overflow-hidden">
-                  <div class="noise-overlay-card-strong"></div>
-                  <div class="text-4xl font-mono text-gray-100 mb-4 relative z-10">03</div>
-                  <h3 class="text-xl font-semibold text-gray-100 mb-4 relative z-10">Закрытый контент, не доступный публично.</h3>
+                <div class="bg-white rounded-2xl p-8 text-center hover:shadow-xl transition-all duration-300">
+                  <div class="w-16 h-16 bg-1AF9D5 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl">📱</span>
+                  </div>
+                  <h3 class="text-xl font-bold text-black mb-4">Отслеживание онлайн</h3>
+                  <p class="text-393B3C">Реальное время отслеживания заказа на карте. Уведомления на каждом этапе.</p>
                 </div>
               </div>
             </div>
           </section>
 
-          <section class="py-20 px-8 border-b border-gray-500/50">
+          <!-- Pricing Section -->
+          <section class="py-16 px-8 bg-white">
+            <div class="max-w-6xl mx-auto">
+              <h2 class="text-4xl font-bold text-black text-center mb-12">Наши тарифы</h2>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="border-2 border-DAE6E6 rounded-2xl p-8 hover:border-1AF9D5 transition-all duration-300">
+                  <h3 class="text-2xl font-bold text-black mb-4">Экспресс</h3>
+                  <p class="text-4xl font-bold text-393B3C mb-6">299 ₽</p>
+                  <ul class="space-y-3 mb-8">
+                    <li class="flex items-center text-393B3C">
+                      <span class="w-2 h-2 bg-1AF9D5 rounded-full mr-3"></span>
+                      До 5 кг
+                    </li>
+                    <li class="flex items-center text-393B3C">
+                      <span class="w-2 h-2 bg-1AF9D5 rounded-full mr-3"></span>
+                      До 2-4 часов
+                    </li>
+                    <li class="flex items-center text-393B3C">
+                      <span class="w-2 h-2 bg-1AF9D5 rounded-full mr-3"></span>
+                      В пределах города
+                    </li>
+                  </ul>
+                  <button 
+                    @click="user ? showCreateOrderPage() : showAuthPage()"
+                    class="w-full bg-1AF9D5 text-black font-semibold py-3 rounded-lg hover:bg-opacity-90 transition-all duration-300"
+                  >
+                    Выбрать
+                  </button>
+                </div>
+                <div class="border-2 border-1AF9D5 rounded-2xl p-8 bg-gradient-to-b from-1AF9D5/10 to-transparent relative">
+                  <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <span class="bg-1AF9D5 text-black px-4 py-1 rounded-full text-sm font-semibold">Популярный</span>
+                  </div>
+                  <h3 class="text-2xl font-bold text-black mb-4">Стандарт</h3>
+                  <p class="text-4xl font-bold text-393B3C mb-6">199 ₽</p>
+                  <ul class="space-y-3 mb-8">
+                    <li class="flex items-center text-393B3C">
+                      <span class="w-2 h-2 bg-1AF9D5 rounded-full mr-3"></span>
+                      До 10 кг
+                    </li>
+                    <li class="flex items-center text-393B3C">
+                      <span class="w-2 h-2 bg-1AF9D5 rounded-full mr-3"></span>
+                      До 6 часов
+                    </li>
+                    <li class="flex items-center text-393B3C">
+                      <span class="w-2 h-2 bg-1AF9D5 rounded-full mr-3"></span>
+                      По городу и пригороду
+                    </li>
+                  </ul>
+                  <button 
+                    @click="user ? showCreateOrderPage() : showAuthPage()"
+                    class="w-full bg-1AF9D5 text-black font-semibold py-3 rounded-lg hover:bg-opacity-90 transition-all duration-300"
+                  >
+                    Выбрать
+                  </button>
+                </div>
+                <div class="border-2 border-DAE6E6 rounded-2xl p-8 hover:border-1AF9D5 transition-all duration-300">
+                  <h3 class="text-2xl font-bold text-black mb-4">Эконом</h3>
+                  <p class="text-4xl font-bold text-393B3C mb-6">99 ₽</p>
+                  <ul class="space-y-3 mb-8">
+                    <li class="flex items-center text-393B3C">
+                      <span class="w-2 h-2 bg-1AF9D5 rounded-full mr-3"></span>
+                      До 15 кг
+                    </li>
+                    <li class="flex items-center text-393B3C">
+                      <span class="w-2 h-2 bg-1AF9D5 rounded-full mr-3"></span>
+                      До 24 часов
+                    </li>
+                    <li class="flex items-center text-393B3C">
+                      <span class="w-2 h-2 bg-1AF9D5 rounded-full mr-3"></span>
+                      Групповая доставка
+                    </li>
+                  </ul>
+                  <button 
+                    @click="user ? showCreateOrderPage() : showAuthPage()"
+                    class="w-full bg-1AF9D5 text-black font-semibold py-3 rounded-lg hover:bg-opacity-90 transition-all duration-300"
+                  >
+                    Выбрать
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- CTA Section -->
+          <section class="py-16 px-8 bg-gradient-to-r from-1AF9D5 to-85AFB5">
             <div class="max-w-4xl mx-auto text-center">
-              <p class="text-2xl text-gray-300 mb-6 leading-relaxed">
-                Каждый день кто-то делает шаг вперёд,<br>
-                а кто-то остаётся наблюдать.
+              <h2 class="text-4xl font-bold text-black mb-6">Готовы отправить посылку?</h2>
+              <p class="text-393B3C text-lg mb-8 max-w-2xl mx-auto">
+                Присоединяйтесь к тысячам довольных клиентов, которые уже пользуются нашим сервисом доставки
               </p>
-              <p class="text-2xl text-gray-100 font-semibold mb-8 leading-relaxed">
-                Разница между ними — один клик.
-              </p>
-              <p class="text-xl text-gray-300 mb-12 leading-relaxed">
-                ENTER — это шаг в сторону контроля,<br>
-                понимания и силы.
-              </p>
-              
-              <button 
-                @click="showCatalogPage"
-                class="bg-white text-black font-semibold py-4 px-12 rounded-lg hover:bg-gray-200 transition-all duration-300 text-lg"
-              >
-                Открыть первую главу
-              </button>
+              <div class="flex justify-center gap-4 flex-wrap">
+                <button
+                  v-if="!user"
+                  @click="showAuthPage"
+                  class="bg-white text-black font-semibold py-4 px-8 rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-lg text-lg"
+                >
+                  Начать сейчас
+                </button>
+                <button
+                  v-if="user"
+                  @click="showCreateOrderPage"
+                  class="bg-white text-black font-semibold py-4 px-8 rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-lg text-lg"
+                >
+                  Создать заказ
+                </button>
+              </div>
             </div>
           </section>
         </main>
       </div>
 
-      <!-- Страница каталога -->
-      <div v-else-if="currentPage === 'catalog'" class="flex-1">
-        <CatalogPage @open-chapter="showChapterDetail" />
-      </div>
-
-      <!-- Страница авторизации/регистрации -->
-      <div v-else-if="currentPage === 'auth'" class="flex-1">
-        <AuthPage @login-success="handleLoginSuccess" />
-      </div>
-
-      <!-- Страница профиля -->
-      <div v-else-if="currentPage === 'profile'" class="flex-1">
-        <ProfilePage @logout="handleLogout" />
-      </div>
-
-      <!-- Детальная страница главы -->
-      <div v-else-if="currentPage === 'chapter-detail'" class="flex-1">
-        <ChapterDetail 
-          :chapter="selectedChapter"
-          @back="showCatalogPage"
-          @add-to-cart="addToCart"
+      <div v-else-if="currentPage === 'auth'">
+        <AuthPage
+          @login-success="handleLoginSuccess"
+          @register-success="handleRegisterSuccess"
+          @back="showMainPage"
         />
       </div>
 
-      <!-- Футер -->
-      <Footer />
+      <div v-else-if="currentPage === 'create-order'">
+        <CreateOrder 
+          v-if="user" 
+          @order-created="handleOrderCreated"
+          @back="showMainPage" 
+        />
+      </div>
+
+      <div v-else-if="currentPage === 'orders'">
+        <OrderList 
+          v-if="user" 
+          :user="user" 
+          @back="showMainPage"
+          @create-new-order="showCreateOrderPage"
+        />
+      </div>
+
+      <div v-else-if="currentPage === 'profile'">
+        <ProfilePage 
+          v-if="user" 
+          :user="user" 
+          @back="showMainPage" 
+          @open-orders="showOrdersPage"
+          @open-create-order="showCreateOrderPage"
+          @open-admin="showAdminPage"
+        />
+      </div>
+
+      <div v-else-if="currentPage === 'admin'">
+        <AdminPanel 
+          v-if="user && user.role === 'admin'" 
+          @back="showMainPage" 
+        />
+      </div>
     </div>
+
+    <!-- Глобальные уведомления -->
+    <div class="fixed top-20 right-4 z-50 space-y-2">
+      <div 
+        v-for="notification in notifications"
+        :key="notification.id"
+        :class="['p-4 rounded-lg shadow-lg transform transition-all duration-300', 
+                 notification.type === 'success' ? 'bg-green-100 border border-green-300 text-green-800' : 
+                 notification.type === 'error' ? 'bg-red-100 border border-red-300 text-red-800' :
+                 'bg-blue-100 border border-blue-300 text-blue-800']"
+      >
+        <div class="flex items-center justify-between">
+          <span>{{ notification.message }}</span>
+          <button 
+            @click="removeNotification(notification.id)"
+            class="ml-4 text-gray-500 hover:text-gray-700"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Футер -->
+    <Footer />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import Header from './components/Header.vue'
-import CatalogPage from './components/CatalogPage.vue'
-import Drawer from './components/Drawer.vue'
-import ProfilePage from './components/ProfilePage.vue'
-import AuthPage from './components/AuthPage.vue'
-import ChapterDetail from './components/ChapterDetail.vue'
-import Footer from './components/Footer.vue'
+import { ref, onMounted } from "vue";
+import Header from "./components/Header.vue";
+import AuthPage from "./components/AuthPage.vue";
+import CreateOrder from "./components/CreateOrder.vue";
+import OrderList from "./components/OrderList.vue";
+import ProfilePage from "./components/ProfilePage.vue";
+import AdminPanel from "./components/AdminPanel.vue";
+import Footer from "./components/Footer.vue";
 
-const activeDrawerType = ref(null)
-const currentPage = ref('main')
-const user = ref(null)
-const selectedChapter = ref(null)
+const currentPage = ref("main");
+const user = ref(null);
+const notifications = ref([]);
+let notificationId = 0;
 
-// Загрузка данных пользователя
-const fetchUser = async () => {
-  try {
-    const token = localStorage.getItem('auth_token')
-    
-    if (!token) {
-      console.log('No token found')
-      return
-    }
-
-    const response = await fetch('http://localhost:8000/api/me', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-
-    const data = await response.json()
-    
-    if (response.status === 401) {
-      localStorage.removeItem('auth_token')
-      user.value = null
-      return
-    }
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch user')
-    }
-
-    if (data.success) {
-      user.value = data.user
-    }
-  } catch (error) {
-    console.error('Ошибка загрузки пользователя:', error)
-    localStorage.removeItem('auth_token')
-    user.value = null
-  }
-}
-
-const openDrawer = (type) => {
-  activeDrawerType.value = type
-}
-
-const closeDrawer = () => {
-  activeDrawerType.value = null
-}
-
-const showCatalogPage = () => {
-  console.log('Opening catalog page')
-  currentPage.value = 'catalog'
-}
-
+const showMainPage = () => (currentPage.value = "main");
+const showAuthPage = () => (currentPage.value = "auth");
+const showCreateOrderPage = () => {
+  if (!user.value) return showAuthPage();
+  currentPage.value = "create-order";
+};
+const showOrdersPage = () => {
+  if (!user.value) return showAuthPage();
+  currentPage.value = "orders";
+};
 const showProfilePage = () => {
-  console.log('Opening profile page')
-  currentPage.value = 'profile'
-}
-
-const showAuthPage = () => {
-  console.log('Opening auth page')
-  currentPage.value = 'auth'
-}
-
-const showMainPage = () => {
-  console.log('Opening main page')
-  currentPage.value = 'main'
-}
-
-const showChapterDetail = (chapter) => {
-  console.log('Opening chapter detail:', chapter)
-  selectedChapter.value = chapter
-  currentPage.value = 'chapter-detail'
-}
-
-const handleProfileClick = () => {
-  console.log('Profile clicked, user:', user.value)
-  if (!user.value) {
-    showAuthPage()
-  } else {
-    showProfilePage()
-  }
-}
+  if (!user.value) return showAuthPage();
+  currentPage.value = "profile";
+};
+const showAdminPage = () => {
+  if (user.value?.role !== "admin") return;
+  currentPage.value = "admin";
+};
 
 const handleLoginSuccess = (userData) => {
-  console.log('Login success:', userData)
-  user.value = userData
-  showProfilePage()
-}
+  user.value = userData;
+  localStorage.setItem("user_data", JSON.stringify(userData));
+  localStorage.setItem("auth_token", "user_" + userData.id);
+  
+  showNotification(`Добро пожаловать, ${userData.full_name}!`, 'success');
+  showProfilePage();
+};
 
-const handleLogout = async () => {
-  try {
-    const token = localStorage.getItem('auth_token')
-    
-    const response = await fetch('http://localhost:8000/api/logout', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
+const handleRegisterSuccess = handleLoginSuccess;
 
-    const data = await response.json()
-    
-    if (data.success) {
-      localStorage.removeItem('auth_token')
-      user.value = null
-      showMainPage()
-    }
-  } catch (error) {
-    console.error('Ошибка выхода:', error)
-    localStorage.removeItem('auth_token')
-    user.value = null
-    showMainPage()
-  }
-}
+const handleLogout = () => {
+  localStorage.clear();
+  user.value = null;
+  showNotification('Вы успешно вышли из системы', 'success');
+  showMainPage();
+};
 
-const handleOpenPaymentMethods = () => {
-  showProfilePage()
-}
+const handleOrderCreated = () => {
+  showNotification('Заказ успешно создан!', 'success');
+  showOrdersPage();
+};
 
-const addToCart = (chapter) => {
-  console.log('Adding to cart:', chapter)
-  // Здесь можно добавить логику добавления в корзину
-  openDrawer('cart')
-}
+const showNotification = (message, type = 'info') => {
+  const id = notificationId++;
+  notifications.value.push({ id, message, type });
+  
+  setTimeout(() => {
+    removeNotification(id);
+  }, 5000);
+};
+
+const removeNotification = (id) => {
+  notifications.value = notifications.value.filter(n => n.id !== id);
+};
 
 onMounted(() => {
-  console.log('App mounted')
-  fetchUser()
-})
+  const savedUser = localStorage.getItem("user_data");
+  if (savedUser) user.value = JSON.parse(savedUser);
+});
+
+defineExpose({ showNotification });
 </script>

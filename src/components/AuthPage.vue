@@ -1,282 +1,161 @@
 <template>
-  <div class="min-h-screen p-8 flex items-center justify-center">
-    <div class="max-w-md w-full">
-      <!-- Авторизация -->
-      <div
-        v-if="currentForm === 'login'"
-        class="border border-gray-500/50 rounded-lg p-8 bg-black/20 backdrop-blur-lg shadow-2xl"
-      >
-        <h2 class="text-2xl font-mono text-gray-100 mb-6 text-center">Авторизация</h2>
+  <div class="min-h-screen bg-gradient-to-br from-85AFB5 to-393B3C flex items-center justify-center p-4 relative">
+    <div class="noise-overlay-section"></div>
+    <div class="w-full max-w-md">
+      <div class="bg-white rounded-2xl shadow-2xl p-8 relative overflow-hidden">
+        <div class="noise-overlay-card"></div>
+        
+        <button 
+          @click="$emit('back')" 
+          class="absolute top-4 left-4 text-393B3C hover:text-85AFB5 transition-colors duration-300"
+        >
+          ← Назад
+        </button>
+        
+        <h2 class="text-3xl font-bold text-center text-393B3C mb-8">
+          {{ isLogin ? "Вход" : "Регистрация" }}
+        </h2>
 
-        <form @submit.prevent="handleLogin" class="space-y-4">
-          <div>
-            <label class="block text-gray-100 text-sm mb-2">Email</label>
-            <input
-              v-model="loginForm.email"
-              type="email"
-              class="w-full border border-gray-500/60 text-gray-300 rounded-md py-2 px-4 bg-black/30 backdrop-blur-sm outline-none focus:border-gray-400 focus:bg-black/40 transition-all duration-300 placeholder-gray-500"
-              placeholder="Введите email"
-              required
+        <form @submit.prevent="handleSubmit" class="space-y-6">
+          <div class="form-group">
+            <label class="text-393B3C">Логин:</label>
+            <input 
+              v-model="form.login" 
+              type="text" 
+              required 
+              class="w-full px-4 py-3 border border-DAE6E6 rounded-lg focus:border-1AF9D5 focus:ring-2 focus:ring-1AF9D5/20 transition-all duration-300"
             />
           </div>
 
-          <div>
-            <label class="block text-gray-100 text-sm mb-2">Пароль</label>
-            <input
-              v-model="loginForm.password"
-              type="password"
-              class="w-full border border-gray-500/60 text-gray-300 rounded-md py-2 px-4 bg-black/30 backdrop-blur-sm outline-none focus:border-gray-400 focus:bg-black/40 transition-all duration-300 placeholder-gray-500"
-              placeholder="Введите пароль"
-              required
+          <div class="form-group">
+            <label class="text-393B3C">Пароль:</label>
+            <input 
+              v-model="form.password" 
+              type="password" 
+              required 
+              class="w-full px-4 py-3 border border-DAE6E6 rounded-lg focus:border-1AF9D5 focus:ring-2 focus:ring-1AF9D5/20 transition-all duration-300"
             />
           </div>
 
-          <button
-            type="submit"
-            :disabled="loading"
-            class="w-full bg-white text-black font-semibold py-3 rounded-lg hover:bg-gray-200 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed backdrop-blur-sm"
+          <div v-if="!isLogin" class="space-y-4">
+            <div class="form-group">
+              <label class="text-393B3C">Полное имя:</label>
+              <input 
+                v-model="form.full_name" 
+                type="text" 
+                required 
+                class="w-full px-4 py-3 border border-DAE6E6 rounded-lg focus:border-1AF9D5 focus:ring-2 focus:ring-1AF9D5/20 transition-all duration-300"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="text-393B3C">Телефон:</label>
+              <input 
+                v-model="form.phone" 
+                type="text" 
+                required 
+                class="w-full px-4 py-3 border border-DAE6E6 rounded-lg focus:border-1AF9D5 focus:ring-2 focus:ring-1AF9D5/20 transition-all duration-300"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="text-393B3C">Email:</label>
+              <input 
+                v-model="form.email" 
+                type="email" 
+                required 
+                class="w-full px-4 py-3 border border-DAE6E6 rounded-lg focus:border-1AF9D5 focus:ring-2 focus:ring-1AF9D5/20 transition-all duration-300"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="text-393B3C">Адрес:</label>
+              <input 
+                v-model="form.address" 
+                type="text" 
+                class="w-full px-4 py-3 border border-DAE6E6 rounded-lg focus:border-1AF9D5 focus:ring-2 focus:ring-1AF9D5/20 transition-all duration-300"
+              />
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            class="w-full bg-1AF9D5 text-393B3C font-semibold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-1AF9D5/25"
           >
-            <span v-if="loading">Вход...</span>
-            <span v-else>Войти</span>
+            {{ isLogin ? "Войти" : "Зарегистрироваться" }}
           </button>
+
+          <p 
+            class="text-center text-85AFB5 cursor-pointer hover:text-1AF9D5 transition-colors duration-300" 
+            @click="isLogin = !isLogin"
+          >
+            {{ isLogin ? "Нет аккаунта? Зарегистрироваться" : "Уже есть аккаунт? Войти" }}
+          </p>
+
+          <p 
+            v-if="message" 
+            :class="['text-center p-3 rounded-lg transition-all duration-300', 
+                     success ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200']"
+          >
+            {{ message }}
+          </p>
         </form>
-
-        <div class="mt-6 text-center">
-          <button
-            @click="switchToRegister"
-            class="text-gray-400 hover:text-gray-300 underline transition-colors duration-300"
-          >
-            Зарегистрироваться
-          </button>
-        </div>
-      </div>
-
-      <!-- Регистрация -->
-      <div
-        v-else
-        class="border border-gray-500/50 rounded-lg p-8 bg-black/20 backdrop-blur-lg shadow-2xl"
-      >
-        <h2 class="text-2xl font-mono text-gray-100 mb-6 text-center">Регистрация</h2>
-
-        <form @submit.prevent="handleRegister" class="space-y-4">
-          <div>
-            <label class="block text-gray-100 text-sm mb-2">Имя пользователя</label>
-            <input
-              v-model="registerForm.name"
-              type="text"
-              class="w-full border border-gray-500/60 text-gray-300 rounded-md py-2 px-4 bg-black/30 backdrop-blur-sm outline-none focus:border-gray-400 focus:bg-black/40 transition-all duration-300 placeholder-gray-500"
-              placeholder="Введите имя пользователя"
-              required
-            />
-          </div>
-
-          <div>
-            <label class="block text-gray-100 text-sm mb-2">Email</label>
-            <input
-              v-model="registerForm.email"
-              type="email"
-              class="w-full border border-gray-500/60 text-gray-300 rounded-md py-2 px-4 bg-black/30 backdrop-blur-sm outline-none focus:border-gray-400 focus:bg-black/40 transition-all duration-300 placeholder-gray-500"
-              placeholder="Введите email"
-              required
-            />
-          </div>
-
-          <div>
-            <label class="block text-gray-100 text-sm mb-2">Пароль</label>
-            <input
-              v-model="registerForm.password"
-              type="password"
-              class="w-full border border-gray-500/60 text-gray-300 rounded-md py-2 px-4 bg-black/30 backdrop-blur-sm outline-none focus:border-gray-400 focus:bg-black/40 transition-all duration-300 placeholder-gray-500"
-              placeholder="Введите пароль"
-              required
-            />
-          </div>
-
-          <div>
-            <label class="block text-gray-100 text-sm mb-2">Подтвердите пароль</label>
-            <input
-              v-model="registerForm.password_confirmation"
-              type="password"
-              class="w-full border border-gray-500/60 text-gray-300 rounded-md py-2 px-4 bg-black/30 backdrop-blur-sm outline-none focus:border-gray-400 focus:bg-black/40 transition-all duration-300 placeholder-gray-500"
-              placeholder="Подтвердите пароль"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            :disabled="loading"
-            class="w-full bg-white text-black font-semibold py-3 rounded-lg hover:bg-gray-200 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed backdrop-blur-sm"
-          >
-            <span v-if="loading">Регистрация...</span>
-            <span v-else>Зарегистрироваться</span>
-          </button>
-        </form>
-
-        <div class="mt-6 text-center">
-          <button
-            @click="switchToLogin"
-            class="text-gray-400 hover:text-gray-300 underline transition-colors duration-300"
-          >
-            Авторизоваться
-          </button>
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref } from "vue";
 
-const emit = defineEmits(['login-success'])
-const currentForm = ref('login')
-const loading = ref(false)
+const emit = defineEmits(['login-success', 'register-success', 'back']);
 
-const loginForm = reactive({
-  email: '',
-  password: ''
-})
+const isLogin = ref(true);
+const message = ref("");
+const success = ref(false);
 
-const registerForm = reactive({
-  name: '',
-  email: '',
-  password: '',
-  password_confirmation: ''
-})
+const form = ref({
+  login: "",
+  password: "",
+  full_name: "",
+  phone: "",
+  email: "",
+  address: "",
+});
 
-const handleLogin = async () => {
-  loading.value = true
+const handleSubmit = async () => {
+  message.value = "";
+
+  const action = isLogin.value ? "login" : "register";
+  const payload = { action, ...form.value };
+
   try {
-    console.log('Начинаем авторизацию...', loginForm)
+    const response = await fetch("http://localhost:8000/api/auth.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-    const response = await fetch('http://localhost:8000/api/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(loginForm)
-    })
+    const data = await response.json();
+    console.log("Ответ от сервера:", data);
 
-    console.log('Ответ сервера:', {
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok
-    })
-
-    const data = await response.json()
-    console.log('Данные ответа:', data)
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('Неверный email или пароль')
-      } else if (response.status === 422) {
-        const errorMsg = data.errors ? Object.values(data.errors).flat().join(', ') : data.message
-        throw new Error(errorMsg)
-      } else if (response.status === 500) {
-        throw new Error('Ошибка сервера. Попробуйте позже.')
+    if (data.success) {
+      success.value = true;
+      message.value = data.message || "Успех!";
+      
+      if (isLogin.value) {
+        emit('login-success', data.user);
       } else {
-        throw new Error(data.message || `Ошибка ${response.status}`)
+        emit('register-success', data.user);
       }
-    }
-
-    if (data.success && data.token) {
-      console.log('Авторизация успешна, токен:', data.token.substring(0, 20) + '...')
-      localStorage.setItem('auth_token', data.token)
-      localStorage.setItem('user_data', JSON.stringify(data.user))
-      emit('login-success', data.user)
     } else {
-      throw new Error(data.message || 'Неизвестная ошибка авторизации')
+      success.value = false;
+      message.value = data.message || "Ошибка";
     }
-
-  } catch (error) {
-    console.error('Ошибка авторизации:', error)
-    
-    if (error.message.includes('Failed to fetch') || error.message.includes('Network')) {
-      alert('Ошибка сети. Проверьте подключение к интернету и запущен ли сервер.')
-    } else {
-      alert(error.message || 'Ошибка при авторизации')
-    }
-  } finally {
-    loading.value = false
+  } catch (err) {
+    success.value = false;
+    message.value = "Ошибка соединения с сервером";
+    console.error(err);
   }
-}
-
-const handleRegister = async () => {
-  loading.value = true
-  try {
-    console.log('Начинаем регистрацию...', registerForm)
-
-    if (registerForm.password !== registerForm.password_confirmation) {
-      throw new Error('Пароли не совпадают')
-    }
-
-    const response = await fetch('http://localhost:8000/api/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(registerForm)
-    })
-
-    console.log('Ответ сервера:', {
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok
-    })
-
-    const data = await response.json()
-    console.log('Данные ответа:', data)
-
-    if (!response.ok) {
-      if (response.status === 422) {
-        const errorMessages = data.errors ? Object.values(data.errors).flat().join('\n') : data.message
-        throw new Error(errorMessages)
-      } else if (response.status === 500) {
-        throw new Error('Ошибка сервера при регистрации')
-      } else {
-        throw new Error(data.message || 'Ошибка регистрации')
-      }
-    }
-
-    if (data.success && data.token) {
-      console.log('Регистрация успешна, токен:', data.token.substring(0, 20) + '...')
-      localStorage.setItem('auth_token', data.token)
-      localStorage.setItem('user_data', JSON.stringify(data.user))
-      emit('login-success', data.user)
-    } else {
-      throw new Error(data.message || 'Неизвестная ошибка регистрации')
-    }
-
-  } catch (error) {
-    console.error('Ошибка регистрации:', error)
-    
-    if (error.message.includes('Failed to fetch') || error.message.includes('Network')) {
-      alert('Ошибка сети. Проверьте подключение к интернету и запущен ли сервер.')
-    } else {
-      const errorMessage = error.message.includes('\n') 
-        ? 'Ошибки:\n' + error.message 
-        : error.message
-      alert(errorMessage)
-    }
-  } finally {
-    loading.value = false
-  }
-}
-
-const switchToLogin = () => {
-  currentForm.value = 'login'
-  registerForm.name = ''
-  registerForm.email = ''
-  registerForm.password = ''
-  registerForm.password_confirmation = ''
-}
-
-const switchToRegister = () => {
-  currentForm.value = 'register'
-  loginForm.email = ''
-  loginForm.password = ''
-}
+};
 </script>
