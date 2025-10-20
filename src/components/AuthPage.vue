@@ -24,6 +24,7 @@
               type="text" 
               required 
               class="w-full px-4 py-3 border border-DAE6E6 rounded-lg focus:border-1AF9D5 focus:ring-2 focus:ring-1AF9D5/20 transition-all duration-300"
+              placeholder="Введите ваш логин"
             />
           </div>
 
@@ -34,6 +35,7 @@
               type="password" 
               required 
               class="w-full px-4 py-3 border border-DAE6E6 rounded-lg focus:border-1AF9D5 focus:ring-2 focus:ring-1AF9D5/20 transition-all duration-300"
+              placeholder="Введите ваш пароль"
             />
           </div>
 
@@ -45,6 +47,7 @@
                 type="text" 
                 required 
                 class="w-full px-4 py-3 border border-DAE6E6 rounded-lg focus:border-1AF9D5 focus:ring-2 focus:ring-1AF9D5/20 transition-all duration-300"
+                placeholder="Иванов Иван Иванович"
               />
             </div>
 
@@ -55,6 +58,7 @@
                 type="text" 
                 required 
                 class="w-full px-4 py-3 border border-DAE6E6 rounded-lg focus:border-1AF9D5 focus:ring-2 focus:ring-1AF9D5/20 transition-all duration-300"
+                placeholder="+7 (999) 123-45-67"
               />
             </div>
 
@@ -65,6 +69,7 @@
                 type="email" 
                 required 
                 class="w-full px-4 py-3 border border-DAE6E6 rounded-lg focus:border-1AF9D5 focus:ring-2 focus:ring-1AF9D5/20 transition-all duration-300"
+                placeholder="example@mail.ru"
               />
             </div>
 
@@ -74,15 +79,17 @@
                 v-model="form.address" 
                 type="text" 
                 class="w-full px-4 py-3 border border-DAE6E6 rounded-lg focus:border-1AF9D5 focus:ring-2 focus:ring-1AF9D5/20 transition-all duration-300"
+                placeholder="г. Москва, ул. Примерная, д. 1"
               />
             </div>
           </div>
 
           <button 
-            type="submit" 
-            class="w-full bg-1AF9D5 text-393B3C font-semibold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-1AF9D5/25"
+            type="submit"
+            :disabled="loading"
+            class="w-full bg-1AF9D5 text-393B3C font-semibold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-1AF9D5/25 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ isLogin ? "Войти" : "Зарегистрироваться" }}
+            {{ loading ? 'Загрузка...' : isLogin ? "Войти" : "Зарегистрироваться" }}
           </button>
 
           <p 
@@ -92,13 +99,13 @@
             {{ isLogin ? "Нет аккаунта? Зарегистрироваться" : "Уже есть аккаунт? Войти" }}
           </p>
 
-          <p 
+          <div 
             v-if="message" 
-            :class="['text-center p-3 rounded-lg transition-all duration-300', 
-                     success ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200']"
+            :class="['p-4 rounded-lg transition-all duration-300 border', 
+                     success ? 'bg-green-100 text-green-700 border-green-300' : 'bg-red-100 text-red-700 border-red-300']"
           >
-            {{ message }}
-          </p>
+            <p class="text-center font-medium">{{ message }}</p>
+          </div>
         </form>
       </div>
     </div>
@@ -113,6 +120,7 @@ const emit = defineEmits(['login-success', 'register-success', 'back']);
 const isLogin = ref(true);
 const message = ref("");
 const success = ref(false);
+const loading = ref(false);
 
 const form = ref({
   login: "",
@@ -124,7 +132,24 @@ const form = ref({
 });
 
 const handleSubmit = async () => {
+  loading.value = true;
   message.value = "";
+  success.value = false;
+
+  // Валидация на клиенте
+  if (!form.value.login || !form.value.password) {
+    message.value = "Логин и пароль обязательны для заполнения";
+    success.value = false;
+    loading.value = false;
+    return;
+  }
+
+  if (!isLogin.value && (!form.value.email || !form.value.full_name || !form.value.phone)) {
+    message.value = "Все обязательные поля должны быть заполнены";
+    success.value = false;
+    loading.value = false;
+    return;
+  }
 
   const action = isLogin.value ? "login" : "register";
   const payload = { action, ...form.value };
@@ -132,7 +157,9 @@ const handleSubmit = async () => {
   try {
     const response = await fetch("http://localhost:8000/api/auth.php", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(payload),
     });
 
@@ -143,19 +170,37 @@ const handleSubmit = async () => {
       success.value = true;
       message.value = data.message || "Успех!";
       
-      if (isLogin.value) {
-        emit('login-success', data.user);
+      // Проверяем, что данные пользователя есть в ответе
+      if (data.user && data.user.id) {
+        if (isLogin.value) {
+          emit('login-success', data.user);
+        } else {
+          emit('register-success', data.user);
+        }
+        
+        // Очищаем форму после успешной операции
+        form.value = {
+          login: "",
+          password: "",
+          full_name: "",
+          phone: "",
+          email: "",
+          address: "",
+        };
       } else {
-        emit('register-success', data.user);
+        message.value = "Ошибка: данные пользователя не получены";
+        success.value = false;
       }
     } else {
       success.value = false;
-      message.value = data.message || "Ошибка";
+      message.value = data.message || "Произошла ошибка";
     }
   } catch (err) {
     success.value = false;
     message.value = "Ошибка соединения с сервером";
-    console.error(err);
+    console.error("Ошибка:", err);
+  } finally {
+    loading.value = false;
   }
 };
 </script>

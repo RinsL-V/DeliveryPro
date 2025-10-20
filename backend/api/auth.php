@@ -26,13 +26,13 @@ $action = $data["action"] ?? '';
 
 if ($action === 'register') {
     $login = $data["login"] ?? '';
-    $password = password_hash($data["password"] ?? '', PASSWORD_DEFAULT);
+    $password_input = $data["password"] ?? '';
     $full_name = $data["full_name"] ?? '';
     $phone = $data["phone"] ?? '';
     $email = $data["email"] ?? '';
     $address = $data["address"] ?? '';
 
-    if (!$login || !$password || !$email) {
+    if (!$login || !$password_input || !$email) {
         echo json_encode(["success" => false, "message" => "Не заполнены обязательные поля"]);
         exit;
     }
@@ -47,13 +47,38 @@ if ($action === 'register') {
         exit;
     }
 
+    // Хешируем пароль
+    $password_hashed = password_hash($password_input, PASSWORD_DEFAULT);
+
     $stmt = $conn->prepare("INSERT INTO users (login, password, full_name, phone, email, address) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssss", $login, $password, $full_name, $phone, $email, $address);
+    $stmt->bind_param("ssssss", $login, $password_hashed, $full_name, $phone, $email, $address);
 
     if ($stmt->execute()) {
-        echo json_encode(["success" => true, "message" => "Registration successful"]);
+        // Получаем ID нового пользователя
+        $user_id = $stmt->insert_id;
+        
+        // Получаем данные нового пользователя
+        $stmt = $conn->prepare("SELECT id, login, full_name, email, phone, address, role FROM users WHERE id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+
+        echo json_encode([
+            "success" => true, 
+            "message" => "Регистрация успешна",
+            "user" => [
+                "id" => $user["id"],
+                "login" => $user["login"],
+                "full_name" => $user["full_name"],
+                "email" => $user["email"],
+                "phone" => $user["phone"],
+                "address" => $user["address"],
+                "role" => $user["role"] ?: "user"
+            ]
+        ]);
     } else {
-        echo json_encode(["success" => false, "message" => "Database error: " . $stmt->error]);
+        echo json_encode(["success" => false, "message" => "Ошибка базы данных: " . $stmt->error]);
     }
     exit;
 }
@@ -62,7 +87,7 @@ if ($action === 'login') {
     $login = $data["login"] ?? '';
     $password = $data["password"] ?? '';
 
-    $stmt = $conn->prepare("SELECT id, password, full_name, email, role FROM users WHERE login = ?");
+    $stmt = $conn->prepare("SELECT id, password, login, full_name, email, phone, address, role FROM users WHERE login = ?");
     $stmt->bind_param("s", $login);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -71,12 +96,15 @@ if ($action === 'login') {
     if ($user && password_verify($password, $user["password"])) {
         echo json_encode([
             "success" => true,
-            "message" => "Login successful",
+            "message" => "Вход выполнен успешно",
             "user" => [
                 "id" => $user["id"],
+                "login" => $user["login"],
                 "full_name" => $user["full_name"],
                 "email" => $user["email"],
-                "role" => $user["role"]
+                "phone" => $user["phone"],
+                "address" => $user["address"],
+                "role" => $user["role"] ?: "user"
             ]
         ]);
     } else {
@@ -85,4 +113,5 @@ if ($action === 'login') {
     exit;
 }
 
-echo json_encode(["success" => false, "message" => "Unknown action"]);
+echo json_encode(["success" => false, "message" => "Неизвестное действие"]);
+?>

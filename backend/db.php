@@ -8,7 +8,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 $servername = "localhost";
 $username = "root";
-$password = "";
+$password = "password";
 $dbname = "deliverypro";
 
 // Создаем соединение
